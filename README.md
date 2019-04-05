@@ -16,7 +16,11 @@ The basic idea of waypoint updater is to get position information from current_p
 So waypoint updater contains the following items:
 * Get position information
 * Get basic waypoint information
+* Get traffic light information
+  - Decelerate waypoints
 * Publish final waypoint
+  - Get the closest waypoint
+
 
 
 <img src="https://user-images.githubusercontent.com/40875720/55613528-73845a80-57bd-11e9-8cf4-641de58c8f7f.PNG" width="400">
