@@ -9,7 +9,7 @@ The following pic shows the structure of the system:
 <img src="https://user-images.githubusercontent.com/40875720/55611564-73ce2700-57b8-11e9-853a-5a142fc8c7af.png" width="600">
 
 ## Planning
-Planning section contains waypoint loader and waypoint updater node. Waypoint lader is provided by Autoware, so in the project we only foucs on waypoint updater part.
+Planning section contains waypoint loader and waypoint updater node. Waypoint loader is provided by Autoware, so in the project we only focus on waypoint updater part.
 
 The basic idea of waypoint updater is to get position information from current_pose topic and get basic waypoints information from base_waypoint topic then publish final waypoint to final_waypoint topic accordingly. Also waypoint updater can consider traffic light and obstacle situations
 
@@ -30,11 +30,11 @@ Now I'd like to go deeper to some subcomponents of waypoint updater
 
 ### Get position information
 
-Declare a subscriber to subscrib current_pose topic, then using a call back function to get positionging information.
+Declare a subscriber to subscribe current_pose topic, then using a call back function to get positionning information.
 For more information please see the attached code:
 
 ```
-# Define a subscriber to subscrib current_pose to get positioning information
+# Define a subscriber to subscribe current_pose to get positioning information
 # Also declare a pose_cb call back function to do some post processing work after receiving the topic
 rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
 
@@ -45,7 +45,7 @@ def pose_cb(self, msg):
 
 ### Get basic waypoint information
 
-Declare a subscriber to subscrib base_waypoints topic, then using  a call back function to get base waypoint information.
+Declare a subscriber to subscribe base_waypoints topic, then using  a call back function to get base waypoint information.
 Then transfer waypoints from 3D to 2D
 ```
 from scipy.spatial import KDTree
@@ -66,7 +66,7 @@ def waypoints_cb(self, waypoints):
 
 ### Get traffic light information
 
-Declare a subscriber to subscribe traffic_waypoint topic, then using a call back function to get the index of stopline. Well prepared for deceleration waypoint topic.
+Declare a subscriber to subscribe traffic_waypoint topic, then using a call back function to get the index of stop line. Well prepared for deceleration waypoint topic.
 ```
 rospy.Subscriber('/traffic_waypoint', Int32, self.traffic_cb)
 
@@ -78,7 +78,7 @@ def traffic_cb(self, msg):
 
 #### Deceleration waypoints
 
-The purpose of deceleration waypoints function is to decelerate the vehicle until stop if there is a red light infornt of the vehicle.
+The purpose of deceleration waypoints function is to decelerate the vehicle until stop if there is a red light in front of the vehicle.
 For this purpose we only need to update the vehicle speed(twist.linear) of the each waypoints.
 In the case, we will create a new waypoint list to update the vehicle speed, otherwise it will over write the original vehicle speed, then the behavior of the vehicle can be strange in the following loops.
 
@@ -125,7 +125,7 @@ https://en.wikipedia.org/wiki/K-d_tree
 
 #### Get the closest waypoints
 
-The purpose of this section is to find the closest waypoint **in front of** the vehicle. Basically this funciton can find the index of the closest waypoint, then be well prepared to publish the waypoints to the final_waypoints topic.
+The purpose of this section is to find the closest waypoint **in front of** the vehicle. Basically this function can find the index of the closest waypoint, then be well prepared to publish the waypoints to the final_waypoints topic.
 
 For more details please refer to the code below,I made some comments to the code
 ```
