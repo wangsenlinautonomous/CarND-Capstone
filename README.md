@@ -63,6 +63,18 @@ def waypoints_cb(self, waypoints):
              # Build KD tree by using KDTree function, KDTree function scipy.spatial lib
 	     self.waypoint_tree = KDTree(self.waypoints_2d)
 ```
+### Publish final waypoints
+
+#### KD Tree introduction
+
+In computer science, a k-d tree (short for k-dimensional tree) is a space-partitioning data structure for organizing points in a k-dimensional space. k-d trees are a useful data structure for several applications, such as searches involving a multidimensional search key (e.g. range searches and nearest neighbor searches). k-d trees are a special case of binary space partitioning trees.
+
+Basically, it contains two parts: Build and Search. In our case, I use "self.waypoint_tree = KDTree(self.waypoints_2d)" function to build KD tree, use "waypoint_tree.query([x, y], 1)[1]" function to search.
+
+Find more information in the following links:
+
+https://baike.baidu.com/item/kd-tree/2302515?fr=aladdin
+https://en.wikipedia.org/wiki/K-d_tree
 
 ### Publish final waypoint
 
