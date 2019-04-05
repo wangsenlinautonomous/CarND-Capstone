@@ -74,7 +74,38 @@ Basically, it contains two parts: Build and Search. In our case, I use "self.way
 Find more information in the following links:
 
 https://baike.baidu.com/item/kd-tree/2302515?fr=aladdin
+
 https://en.wikipedia.org/wiki/K-d_tree
+
+#### Get the closest waypoints
+
+The purpose of this section is to find the closest waypoint **in front of** the vehicle. Basically this funciton can find the index of the closest waypoint, then be well prepared to publish the waypoints to the final_waypoints topic.
+
+For more details please refer to the code below,I made some comments to the code
+```
+def get_closest_waypoint_idx(self):
+        # Get the coordinates of our car
+        x = self.pose.pose.position.x
+        y = self.pose.pose.position.y
+	
+        # Get the index of the closest point
+        closest_idx = self.waypoint_tree.query([x, y], 1)[1]
+
+        # Check if closest is ahead or behind vehicle
+        closest_coord = self.waypoints_2d[closest_idx]
+        prev_coord = self.waypoints_2d[closest_idx - 1]
+
+        # Equation for hyperplane through closest_coords
+        cl_vect = np.array(closest_coord)
+        prev_vect = np.array(prev_coord)
+        pos_vect = np.array([x, y])
+
+        val = np.dot(cl_vect - prev_vect, pos_vect - cl_vect)
+        if val > 0: # Our car is in front of the closest waypoint
+            closest_idx = (closest_idx + 1) % len(self.waypoints_2d)
+
+        return closest_idx
+```
 
 ### Publish final waypoint
 
