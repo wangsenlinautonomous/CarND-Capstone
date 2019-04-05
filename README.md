@@ -30,7 +30,7 @@ Now I'd like to go deeper to some subcomponents of waypoint updater
 
 ### Get position information
 
-I declare a subscriber to subscrib current_pose topic, then using a call back function to get positionging information.
+Declare a subscriber to subscrib current_pose topic, then using a call back function to get positionging information.
 For more information please see the attached code:
 
 ```
@@ -45,7 +45,7 @@ def pose_cb(self, msg):
 
 ### Get basic waypoint information
 
-I declare a subscriber to subscrib base_waypoints topic, then using  a call back function to get base waypoint information.
+Declare a subscriber to subscrib base_waypoints topic, then using  a call back function to get base waypoint information.
 Then transfer waypoints from 3D to 2D
 ```
 from scipy.spatial import KDTree
@@ -63,6 +63,52 @@ def waypoints_cb(self, waypoints):
              # Build KD tree by using KDTree function, KDTree function scipy.spatial lib
 	     self.waypoint_tree = KDTree(self.waypoints_2d)
 ```
+
+### Get traffic light information
+
+Declare a subscriber to subscribe traffic_waypoint topic, then using a call back function to get the index of stopline. Well prepared for deceleration waypoint topic.
+```
+rospy.Subscriber('/traffic_waypoint', Int32, self.traffic_cb)
+
+def traffic_cb(self, msg):
+        # TODO: Callback for /traffic_waypoint message. Implement
+        self.stopline_wp_idx = msg.data
+	
+```
+
+#### Deceleration waypoints
+
+The purpose of deceleration waypoints function is to decelerate the vehicle until stop if there is a red light infornt of the vehicle.
+For this purpose we only need to update the vehicle speed(twist.linear) of the each waypoints.
+In the case, we will create a new waypoint list to update the vehicle speed, otherwise it will over write the original vehicle speed, then the behavior of the vehicle can be strange in the following loops.
+
+Also to get a smooth vehicle speed is quite important. we use "vel = math.sqrt(2 * MAX_DECEL * SAFETY_FACTOR * dist)" to calculate the velocity according to dist. The result is showing in the following pic:
+
+<img src="https://user-images.githubusercontent.com/40875720/55624827-a4728880-57d9-11e9-911e-08ea61ea5bd4.PNG" width="400">
+
+```
+def decelerate_waypoints(self, waypoints, closest_idx):
+        result = []
+        for i, wp in enumerate(waypoints):
+            new_point = Waypoint()
+            new_point.pose = wp.pose
+	    
+	    # Should stop in front of the stop line, otherwise it will be dangerous to break law
+            stop_idx = max(self.stopline_wp_idx - closest_idx - 2, 0)  
+	    
+            # the car stops at the line
+            dist = self.distance(waypoints, i, stop_idx)
+            vel = math.sqrt(2 * MAX_DECEL * SAFETY_FACTOR * dist)
+            if vel < 1.0:
+                vel = 0.0
+
+            new_point.twist.twist.linear.x = min(vel, wp.twist.twist.linear.x)
+            result.append(new_point)
+
+        return result
+```
+
+
 ### Publish final waypoints
 
 #### KD Tree introduction
@@ -106,8 +152,6 @@ def get_closest_waypoint_idx(self):
 
         return closest_idx
 ```
-
-### Publish final waypoint
 
 The result is showing as below:
 
