@@ -1,5 +1,17 @@
+# CarND-Capstone
+
+## Overview
 This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
 
+For this project, you'll be writing ROS nodes to implement core functionality of the autonomous vehicle system, including traffic light detection, control, and waypoint following! You will test your code using a simulator, and when you are ready, your group can submit the project to be run on Carla.
+
+The following pic shows the structure of the system:
+<img src="https://user-images.githubusercontent.com/40875720/55611564-73ce2700-57b8-11e9-853a-5a142fc8c7af.png" width="600">
+
+## Planning
+Planning section contains waypoint loader and waypoint updater node. Waypoint lader is provided by Autoware, so in the project we only foucs on waypoint updater part.
+
+## Environment Setup
 Please use **one** of the two installation options, either native **or** docker installation.
 
 ### Native Installation
@@ -72,3 +84,6 @@ cd CarND-Capstone/ros
 roslaunch launch/site.launch
 ```
 5. Confirm that traffic light detection works on real life images
+
+
+
