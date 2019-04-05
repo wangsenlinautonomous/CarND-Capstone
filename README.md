@@ -11,6 +11,48 @@ The following pic shows the structure of the system:
 ## Planning
 Planning section contains waypoint loader and waypoint updater node. Waypoint lader is provided by Autoware, so in the project we only foucs on waypoint updater part.
 
+The basic idea of waypoint updater is to get position information from current_pose topic and get basic waypoints information from base_waypoint topic then publish final waypoint to final_waypoint topic accordingly. Also waypoint updater can consider traffic light and obstacle situations
+
+<img src="https://user-images.githubusercontent.com/40875720/55613528-73845a80-57bd-11e9-8cf4-641de58c8f7f.PNG" width="400">
+
+Now I'd like to go deeper to some subcomponents of waypoint updater
+
+### Get position information
+
+I declare a subscriber to subscrib current_pose topic, then using a call back function to get positionging information.
+For more information please see the attached code:
+
+```
+# Define a subscriber to subscrib current_pose to get positioning information
+# Also declare a pose_cb call back function to do some post processing work after receiving the topic
+rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
+
+# Define a call back fuction to init pose variable when receiving current_pos topic
+def pose_cb(self, msg):
+        self.pose = msg
+```
+
+### Get basic waypoint information
+
+I declare a subscriber to subscrib base_waypoints topic, then using  a call back function to get base waypoint information.
+Then transfer waypoints from 3D to 2D
+```
+rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
+
+def waypoints_cb(self, waypoints):
+        #Get the basic waypoints from waypoint loader.This action only need to be done once
+        self.base_waypoints = waypoints
+	
+        #Got 2d waypoints from 3d waypoints
+        if not self.waypoints_2d:
+             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
+             self.waypoint_tree = KDTree(self.waypoints_2d)
+```
+
+The result is showing as below:
+
+<img src="https://user-images.githubusercontent.com/40875720/55612987-22279b80-57bc-11e9-83e4-91e97e06c8ec.PNG" width="400">
+
 ## Environment Setup
 Please use **one** of the two installation options, either native **or** docker installation.
 
