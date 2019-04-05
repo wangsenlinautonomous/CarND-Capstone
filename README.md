@@ -19,6 +19,7 @@ So waypoint updater contains the following items:
 * Get traffic light information
   - Decelerate waypoints
 * Publish final waypoint
+  - KD tree introduction
   - Get the closest waypoint
 
 
