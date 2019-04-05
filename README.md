@@ -13,6 +13,12 @@ Planning section contains waypoint loader and waypoint updater node. Waypoint la
 
 The basic idea of waypoint updater is to get position information from current_pose topic and get basic waypoints information from base_waypoint topic then publish final waypoint to final_waypoint topic accordingly. Also waypoint updater can consider traffic light and obstacle situations
 
+So waypoint updater contains the following items:
+* Get position information
+* Get basic waypoint information
+* Publish final waypoint
+
+
 <img src="https://user-images.githubusercontent.com/40875720/55613528-73845a80-57bd-11e9-8cf4-641de58c8f7f.PNG" width="400">
 
 Now I'd like to go deeper to some subcomponents of waypoint updater
@@ -37,6 +43,8 @@ def pose_cb(self, msg):
 I declare a subscriber to subscrib base_waypoints topic, then using  a call back function to get base waypoint information.
 Then transfer waypoints from 3D to 2D
 ```
+from scipy.spatial import KDTree
+
 rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
 
 def waypoints_cb(self, waypoints):
@@ -45,9 +53,13 @@ def waypoints_cb(self, waypoints):
 	
         #Got 2d waypoints from 3d waypoints
         if not self.waypoints_2d:
+	     # Only take x and y in to consideration to get 2D waypoints
              self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
-             self.waypoint_tree = KDTree(self.waypoints_2d)
+             # Build KD tree by using KDTree function, KDTree function scipy.spatial lib
+	     self.waypoint_tree = KDTree(self.waypoints_2d)
 ```
+
+### Publish final waypoint
 
 The result is showing as below:
 
