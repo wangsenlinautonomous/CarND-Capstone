@@ -169,15 +169,86 @@ Once messages are being published to /final_waypoints, the vehicle's waypoint fo
 * /vehicle/brake_cmd
 * /vehicle/steering_cmd
 
-Since a safety driver may take control of the car during testing, you should not assume that the car is always following your commands. If a safety driver does take over, your PID controller will mistakenly accumulate error, so you will need to be mindful of DBW status. The DBW status can be found by subscribing to /vehicle/dbw_enabled.
-
-When operating the simulator please check DBW status and ensure that it is in the desired state. DBW can be toggled by clicking "Manual" in the simulator GUI.
-
 DBW node part contains the following items:
 * Get DBW enable information
 * Get vehilce speed information
 * Get linear & angular speed information
 * Control throttle, brake and steering
+
+### Get DBW enable information
+
+Since a safety driver may take control of the car during testing, you should not assume that the car is always following your commands. If a safety driver does take over, your PID controller will mistakenly accumulate error, so you will need to be mindful of DBW status. The DBW status can be found by subscribing to /vehicle/dbw_enabled.
+When operating the simulator please check DBW status and ensure that it is in the desired state. DBW can be toggled by clicking "Manual" in the simulator GUI.
+This part is quite simple, we only need to get signal from the message. For more information please refer the code as below:
+
+```
+rospy.Subscriber('/vehicle/dbw_enabled', Bool, self.dbw_enabled_cb)
+def dbw_enabled_cb(self, msg):
+        self.dbw_enabled = msg
+```
+
+### Get vehicle speed information
+
+Current speed is important for PID cotroller to calculate the speed error. This part is also quite simple, please find more information in the below code:
+```
+rospy.Subscriber('/current_velocity', TwistStamped, self.velocity_cb)
+def velocity_cb(self, msg):
+        self.current_vel = msg.twist.linear.x 
+```
+### Get linear & angular speed information
+
+The part is to get the desire linear and angular vehilce from waypoint_follower. Please find more information in the below code:
+```
+rospy.Subscriber('/twist_cmd', TwistStamped, self.twist_cb)
+def twist_cb(self, msg):
+        self.linear_vel = msg.twist.linear.x
+        self.angular_vel = msg.twist.angular.z
+```
+
+### Control throttle, brake and steering
+
+#### Trottle control
+
+In the project, we are trying to control a traditional vehicle, so we need to control throttle, brake and steering, but on the other hand, if we control new engery vehilce, then we only need to control speed and steering, it will be easier. Back to our topic, we need to following the following steps to control throttle:
+
+* Filter current speed using low pass filter
+* Calculate velocity error (desired linear velocity minus current linear velocity)
+* Optimize velocity error (Consider deceleration limit & acceleration speed)
+* Get sample time (sample time is used to calculate derivative)
+* Call PID function to get the throttle value
+```
+        current_linear_velocity = self.vel_lpf.filt(current_linear_velocity)
+        
+        velocity_error = desired_linear_velocity - current_linear_velocity
+	velocity_error = max(self.decel_limit,velocity_error)
+	velocity_error = min(velocity_error,self.accel_limit)
+
+        self.last_vel = current_linear_velocity
+        
+        # find the time duration and a new timestamp
+        current_time = rospy.get_time()
+        sample_time = current_time - self.last_time
+        self.last_time = current_time
+        
+        throttle = self.throttle_controller.step(velocity_error, sample_time)
+```
+
+#### Brake control
+
+Since we are using traditional vehicle, we need to apply some brake touque to stop the vehicle.
+
+```
+        brake = 0       
+        if desired_linear_velocity <= 0.3:
+            throttle = 0
+            brake = 0.4*self.max_brake_torque
+	    if current_linear_velocity <= 0.3:
+		brake = self.max_brake_torque # Torque N*m
+	brake = min(brake,self.max_brake_torque)
+	brake = max(0.0, brake)
+
+	brake = self.brake_lpf.filt(brake)
+```
 
 ## Environment Setup
 Please use **one** of the two installation options, either native **or** docker installation.
