@@ -157,6 +157,28 @@ The result is showing as below:
 
 <img src="https://user-images.githubusercontent.com/40875720/55612987-22279b80-57bc-11e9-83e4-91e97e06c8ec.PNG" width="400">
 
+## Control
+
+Control section contains two parts: Waypoints follower and DBW node. Waypoint follower is used to do near plan planning which means to plan path from one waypoint to the next, the part is provided by Autoware (C++ code, will learn & Modify it latter on). DBW node is our main work in this project. 
+
+<img src="https://user-images.githubusercontent.com/40875720/55665975-a04a7780-587a-11e9-83d0-0ef5901dc4a2.PNG" width="400">
+
+Once messages are being published to /final_waypoints, the vehicle's waypoint follower will publish twist commands to the /twist_cmd topic. The goal for this part of the project is to implement the drive-by-wire node (dbw_node.py) which will subscribe to /twist_cmd and use various controllers to provide appropriate throttle, brake, and steering commands. These commands can then be published to the following topics:
+
+* /vehicle/throttle_cmd
+* /vehicle/brake_cmd
+* /vehicle/steering_cmd
+
+Since a safety driver may take control of the car during testing, you should not assume that the car is always following your commands. If a safety driver does take over, your PID controller will mistakenly accumulate error, so you will need to be mindful of DBW status. The DBW status can be found by subscribing to /vehicle/dbw_enabled.
+
+When operating the simulator please check DBW status and ensure that it is in the desired state. DBW can be toggled by clicking "Manual" in the simulator GUI.
+
+DBW node part contains the following items:
+* Get DBW enable information
+* Get vehilce speed information
+* Get linear & angular speed information
+* Control throttle, brake and steering
+
 ## Environment Setup
 Please use **one** of the two installation options, either native **or** docker installation.
 
